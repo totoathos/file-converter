@@ -4,7 +4,7 @@ from converters.tables import csv_to_xlsx, xlsx_to_csv
 from converters.audio import audio_convert
 from converters.video import mp4_to_gif, compress_mp4_ffmpeg
 
-st.set_page_config(page_title="Mini File Converter")
+st.set_page_config(page_title="File Converter")
 
 MODES = {
     "JPG a PNG": "img_jpg_png",
@@ -56,18 +56,18 @@ if uploaded and st.button("Convertir"):
         out_name = base_name + ".wav"
 
     elif mode == "mp4_gif":
-        result_bytes = mp4_to_gif(file_bytes)
-        out_name = base_name + ".gif"
-
+        try:
+            result_bytes = mp4_to_gif(file_bytes)
+            out_name = base_name + ".gif"
+        except RuntimeError as e:
+            st.error(f"Ocurrió un error al generar el GIF: {e}")   
     elif mode == "mp4_compress":
         try:
-            # CRF y resolución por defecto adentro de compress_mp4_ffmpeg
             result_bytes = compress_mp4_ffmpeg(file_bytes)
             out_name = base_name + "_compressed.mp4"
-        except FileNotFoundError:
-            st.error("ffmpeg no está instalado o no está en el PATH del sistema.")
-        except Exception as e:
+        except RuntimeError as e:
             st.error(f"Ocurrió un error al comprimir el video: {e}")
+
 
     if result_bytes:
         st.success("Conversión completa.")

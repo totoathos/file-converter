@@ -4,3 +4,4 @@ pandas
 openpyxl
 pydub
 moviepy
+imageio-ffmpeg
