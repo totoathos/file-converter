@@ -1,10 +1,13 @@
-from io import BytesIO
-from moviepy import VideoFileClip
-import tempfile
 from pathlib import Path
+import tempfile
 import subprocess
 
-def mp4_to_gif(file_bytes: bytes) -> bytes:
+def mp4_to_gif(file_bytes: bytes, fps: int = 15, target_height: int | None = None) -> bytes:
+    """
+    Convierte un MP4 a GIF usando ffmpeg para evitar dependencia de moviepy.
+    - fps: cuadros por segundo del GIF resultante.
+    - target_height: si se especifica, escala la altura manteniendo proporción.
+    """
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
         in_path = tmpdir / "input.mp4"
@@ -12,8 +15,27 @@ def mp4_to_gif(file_bytes: bytes) -> bytes:
 
         in_path.write_bytes(file_bytes)
 
-        clip = VideoFileClip(str(in_path))
-        clip.write_gif(str(out_path))
+        if target_height:
+            vf = f"fps={fps},scale=-2:{target_height}"
+        else:
+            # Asegura dimensiones pares necesarias para algunos códecs/convertidores
+            vf = f"fps={fps},scale=trunc(iw/2)*2:trunc(ih/2)*2"
+
+        cmd = [
+            "ffmpeg",
+            "-y",               # overwrite
+            "-i", str(in_path),
+            "-vf", vf,
+            "-loop", "0",
+            str(out_path),
+        ]
+
+        subprocess.run(
+            cmd,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
         return out_path.read_bytes()
     
