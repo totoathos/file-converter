@@ -13,8 +13,7 @@ MODES = {
     "XLSX a CSV": "xlsx_csv",
     "WAV a MP3": "wav_mp3",
     "MP3 a WAV": "mp3_wav",
-    "MP4 a GIF": "mp4_gif",
-    "MP4 Comprimir (con ffmpeg)": "mp4_compress",
+    #"MP4 a GIF": "mp4_gif",
 }
 
 st.title("File Converter")
